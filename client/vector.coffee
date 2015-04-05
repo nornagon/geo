@@ -9,5 +9,7 @@ v.atan2 = (w) -> Math.atan2 w.y, w.x
 v.forAngle = (t) -> v(Math.cos(t), Math.sin(t))
 v.cross = ({x:x1,y:y1}, {x:x2,y:y2}) -> x1*y2 - x2*y1
 v.dot = ({x:x1,y:y1}, {x:x2,y:y2}) -> x1*x2 + y1*y2
+v.perp = ({x,y}) -> v(-y, x)
+v.neg = ({x,y}) -> v(-x, -y)
 
 module.exports = v

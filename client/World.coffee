@@ -37,7 +37,28 @@ seg2arc = (seg, arc) ->
       .map (t) -> v.add a, v.scale b, t
       # TODO: filter only the intersections that fall within the arc
 
-arc2arc = ->
+arc2arc = (a1, a2) ->
+  r1 = v.len a1.radius
+  r2 = v.len a2.radius
+
+  dv = v.sub a2.center, a1.center
+  d = v.len(dv)
+  x = (d*d + (r1*r1 - r2*r2)) / (2*d)
+  y2 = r1*r1 - x*x
+  if y2 >= 0
+    y = Math.sqrt(y2)
+    dvn = v.norm dv
+    [
+      v.add(
+        v.scale dvn, x
+        v.scale v.perp(dvn), y
+      )
+      v.add(
+        v.scale dvn, x
+        v.scale v.neg(v.perp dvn), y
+      )
+    ].map (p) -> v.add a1.center, p
+  else []
 
 intersectionTable =
   1:
