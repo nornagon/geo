@@ -1,8 +1,15 @@
-canvas = document.body.appendChild document.createElement 'canvas'
-canvas.width = (WIDTH = 600)*devicePixelRatio
-canvas.height = (HEIGHT = 600)*devicePixelRatio
-canvas.style.width = WIDTH+'px'
-canvas.style.height = HEIGHT+'px'
+assign = (o1, o2) -> o1[k] = v for own k,v of o2
+
+WIDTH = 600
+HEIGHT = 600
+
+container = document.body.appendChild document.createElement 'div'
+assign container.style,
+  position: 'relative'
+canvas = container.appendChild document.createElement 'canvas'
+canvas.width = WIDTH*devicePixelRatio
+canvas.height = HEIGHT*devicePixelRatio
+
 ctx = canvas.getContext '2d'
 ctx.scale devicePixelRatio, devicePixelRatio
 ctx.lineCap = 'round'
@@ -16,6 +23,69 @@ DeleteTool = require('./tools/DeleteTool')
 world = new World
 currentTool = new ArcTool world
 currentMousePos = null
+
+require('./buttons.scss')
+
+assign canvas.style,
+  width: WIDTH+'px'
+  height: HEIGHT+'px'
+  boxShadow: '0px 0px 4px hsl(0,0%,88%)'
+assign document.body.style,
+  display: 'flex'
+  alignItems: 'center'
+  justifyContent: 'center'
+  height: '100%'
+assign document.documentElement.style,
+  height: '100%'
+
+buttonSize = 40
+buttonBar = container.appendChild document.createElement 'div'
+buttonBar.classList.add 'button-bar'
+buttons =
+  point:
+    icon: 'fa-times'
+    click: ->
+      currentTool = new PointTool world
+      document.querySelector('.button.active').classList.remove('active')
+      buttonBar.children[0].classList.add('active')
+      changed()
+  line:
+    icon: 'fa-plus'
+    click: ->
+      currentTool = new LineTool world
+      document.querySelector('.button.active').classList.remove('active')
+      buttonBar.children[1].classList.add('active')
+      changed()
+  arc:
+    icon: 'fa-circle-o'
+    click: ->
+      currentTool = new ArcTool world
+      document.querySelector('.button.active').classList.remove('active')
+      buttonBar.children[2].classList.add('active')
+      changed()
+
+  delete:
+    icon: 'fa-ban'
+    click: ->
+      currentTool = new DeleteTool world
+      document.querySelector('.button.active').classList.remove('active')
+      buttonBar.children[3].classList.add('active')
+      changed()
+
+for _,button of buttons
+  buttonEl = buttonBar.appendChild document.createElement 'div'
+  buttonEl.classList.add 'button'
+  content = buttonEl.appendChild document.createElement 'div'
+  content.classList.add 'content'
+  icon = content.appendChild document.createElement 'i'
+  icon.classList.add 'fa'
+  icon.classList.add 'fa-fw'
+  icon.classList.add button.icon
+  buttonEl.onclick = button.click
+  buttonEl.classList.add 'active' if button.icon is 'fa-plus'
+  buttonEl.onmouseover = ->
+    currentMousePos = null
+    changed()
 
 draw = ->
   ctx.clearRect 0, 0, canvas.width, canvas.height
@@ -40,7 +110,7 @@ canvas.onmousemove = (e) ->
   [x, y] = [e.offsetX, e.offsetY]
   pt = world.snap {x, y}
   currentMousePos = pt
-  currentTool.move pt
+  currentTool.move? pt
   changed()
 
 window.onkeydown = (e) ->
@@ -51,20 +121,16 @@ window.onkeydown = (e) ->
       changed()
     when 'P'.charCodeAt(0)
       e.preventDefault()
-      currentTool = new PointTool world
-      changed()
+      buttons.point.click()
     when 'L'.charCodeAt(0)
       e.preventDefault()
-      currentTool = new LineTool world
-      changed()
+      buttons.line.click()
     when 'A'.charCodeAt(0)
       e.preventDefault()
-      currentTool = new ArcTool world
-      changed()
+      buttons.arc.click()
     when 'D'.charCodeAt(0)
       e.preventDefault()
-      currentTool = new DeleteTool world
-      changed()
+      buttons.delete.click()
     else
       currentTool.key? e, currentMousePos
       console.log e.defaultPrevented

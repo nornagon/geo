@@ -6,11 +6,12 @@
   "devDependencies": {
     "browserify": "^8.0.3",
     "coffeeify": "^1.0.0",
+    "sassify": "^0.7.0",
     "watchify": "^2.2.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "watchify client/index.coffee -o public/bundle.js --debug --verbose -t coffeeify --extension=.coffee"
+    "watch": "watchify client/index.coffee -o public/bundle.js --debug --verbose -t coffeeify --extension=.coffee -t [ sassify --auto-inject ]"
   },
   "author": "Jeremy Apthorp <nornagon@nornagon.net>",
   "license": "BSD"

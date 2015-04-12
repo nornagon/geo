@@ -39,10 +39,10 @@ class ArcTool
     @state = 'center'
 
   draw: (ctx, mouse) ->
+    return unless mouse?
     ctx.lineWidth = 1
     switch @state
       when 'center'
-        return unless mouse?
         ctx.beginPath()
         ctx.arc mouse.x, mouse.y, 4, 0, Math.PI*2
         ctx.stroke()

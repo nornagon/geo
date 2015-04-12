@@ -9,6 +9,7 @@ class PointTool
   move: (pt) ->
 
   draw: (ctx, mouse) ->
+    return unless mouse?
     ctx.beginPath()
     ctx.moveTo mouse.x-4, mouse.y-4
     ctx.lineTo mouse.x+4, mouse.y+4
