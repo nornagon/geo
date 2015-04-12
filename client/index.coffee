@@ -1,3 +1,11 @@
+World = require('./World')
+PointTool = require('./tools/PointTool')
+LineTool = require('./tools/LineTool')
+ArcTool = require('./tools/ArcTool')
+DeleteTool = require('./tools/DeleteTool')
+
+{ButtonBar} = require('./buttons')
+
 assign = (o1, o2) -> o1[k] = v for own k,v of o2
 
 WIDTH = 600
@@ -14,17 +22,9 @@ ctx = canvas.getContext '2d'
 ctx.scale devicePixelRatio, devicePixelRatio
 ctx.lineCap = 'round'
 
-World = require('./World')
-PointTool = require('./tools/PointTool')
-LineTool = require('./tools/LineTool')
-ArcTool = require('./tools/ArcTool')
-DeleteTool = require('./tools/DeleteTool')
-
 world = new World
 currentTool = new ArcTool world
 currentMousePos = null
-
-require('./buttons.scss')
 
 assign canvas.style,
   width: WIDTH+'px'
@@ -38,54 +38,43 @@ assign document.body.style,
 assign document.documentElement.style,
   height: '100%'
 
-buttonSize = 40
-buttonBar = container.appendChild document.createElement 'div'
-buttonBar.classList.add 'button-bar'
-buttons =
+buttons = ->
   point:
     icon: 'fa-times'
+    active: currentTool.constructor is PointTool
     click: ->
       currentTool = new PointTool world
-      document.querySelector('.button.active').classList.remove('active')
-      buttonBar.children[0].classList.add('active')
       changed()
+    hover: -> currentMousePos = null; changed()
   line:
     icon: 'fa-plus'
+    active: currentTool.constructor is LineTool
     click: ->
       currentTool = new LineTool world
-      document.querySelector('.button.active').classList.remove('active')
-      buttonBar.children[1].classList.add('active')
       changed()
+    hover: -> currentMousePos = null; changed()
   arc:
     icon: 'fa-circle-o'
+    active: currentTool.constructor is ArcTool
     click: ->
       currentTool = new ArcTool world
-      document.querySelector('.button.active').classList.remove('active')
-      buttonBar.children[2].classList.add('active')
       changed()
-
+    hover: -> currentMousePos = null; changed()
   delete:
     icon: 'fa-ban'
+    active: currentTool.constructor is DeleteTool
     click: ->
       currentTool = new DeleteTool world
-      document.querySelector('.button.active').classList.remove('active')
-      buttonBar.children[3].classList.add('active')
       changed()
+    hover: -> currentMousePos = null; changed()
 
-for _,button of buttons
-  buttonEl = buttonBar.appendChild document.createElement 'div'
-  buttonEl.classList.add 'button'
-  content = buttonEl.appendChild document.createElement 'div'
-  content.classList.add 'content'
-  icon = content.appendChild document.createElement 'i'
-  icon.classList.add 'fa'
-  icon.classList.add 'fa-fw'
-  icon.classList.add button.icon
-  buttonEl.onclick = button.click
-  buttonEl.classList.add 'active' if button.icon is 'fa-plus'
-  buttonEl.onmouseover = ->
-    currentMousePos = null
-    changed()
+diff = require('virtual-dom/diff')
+patch = require('virtual-dom/patch')
+createElement = require('virtual-dom/create-element')
+
+$buttonBar = ButtonBar(buttons())
+$buttonRoot = createElement($buttonBar)
+container.appendChild($buttonRoot)
 
 draw = ->
   ctx.clearRect 0, 0, canvas.width, canvas.height
@@ -95,6 +84,11 @@ draw = ->
   ctx.save()
   currentTool.draw ctx, currentMousePos
   ctx.restore()
+
+  newBar = ButtonBar(buttons())
+  patches = diff($buttonBar, newBar)
+  patch($buttonRoot, patches)
+  $buttonBar = newBar
 
 changed = ->
   draw()
@@ -121,17 +115,20 @@ window.onkeydown = (e) ->
       changed()
     when 'P'.charCodeAt(0)
       e.preventDefault()
-      buttons.point.click()
+      currentTool = new PointTool world
+      changed()
     when 'L'.charCodeAt(0)
       e.preventDefault()
-      buttons.line.click()
+      currentTool = new LineTool world
+      changed()
     when 'A'.charCodeAt(0)
       e.preventDefault()
-      buttons.arc.click()
+      currentTool = new ArcTool world
+      changed()
     when 'D'.charCodeAt(0)
       e.preventDefault()
-      buttons.delete.click()
+      currentTool = new DeleteTool world
+      changed()
     else
       currentTool.key? e, currentMousePos
-      console.log e.defaultPrevented
       changed() if e.defaultPrevented

@@ -14,5 +14,9 @@
     "watch": "watchify client/index.coffee -o public/bundle.js --debug --verbose -t coffeeify --extension=.coffee -t [ sassify --auto-inject ]"
   },
   "author": "Jeremy Apthorp <nornagon@nornagon.net>",
-  "license": "BSD"
+  "license": "BSD",
+  "dependencies": {
+    "classnames": "^1.2.0",
+    "virtual-dom": "^2.0.1"
+  }
 }
