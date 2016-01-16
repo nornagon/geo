@@ -6,7 +6,7 @@
   "devDependencies": {
     "browserify": "^8.0.3",
     "coffeeify": "^1.0.0",
-    "sassify": "^0.7.0",
+    "sassify": "^0.9.1",
     "watchify": "^2.2.1"
   },
   "scripts": {
